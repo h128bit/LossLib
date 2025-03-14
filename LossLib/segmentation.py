@@ -5,16 +5,14 @@ import torch.nn.functional as F
 
 
 class DiceLoss(nn.Module):
-    def __init__(self, weight=None, size_average=True, smooth=1):
+    def __init__(self, smooth=1, weight=None, size_average=True):
         super(DiceLoss, self).__init__()
         self.smooth = smooth
 
 
     def forward(self, inputs, targets, smooth=None):
-        # comment out if your model contains a sigmoid or equivalent activation layer
         smooth = smooth if smooth else self.smooth
-
-        inputs = F.sigmoid(inputs)
+        
         # flatten label and prediction tensors
         inputs = inputs.view(-1)
         targets = targets.view(-1)
@@ -26,15 +24,12 @@ class DiceLoss(nn.Module):
 
 
 class DiceBCELoss(nn.Module):
-    def __init__(self, weight=None, size_average=True, smooth=1):
+    def __init__(self, smooth=1, weight=None, size_average=True):
         super(DiceBCELoss, self).__init__()
         self.smooth = smooth
 
     def forward(self, inputs, targets, smooth=None):
-        # comment out if your model contains a sigmoid or equivalent activation layer
-        smooth if smooth else self.smooth
-
-        inputs = F.sigmoid(inputs)
+        smooth = smooth if smooth else self.smooth
 
         # flatten label and prediction tensors
         inputs = inputs.view(-1)
@@ -49,15 +44,12 @@ class DiceBCELoss(nn.Module):
 
 
 class IoULoss(nn.Module):
-    def __init__(self, weight=None, size_average=True, smooth=1):
+    def __init__(self, smooth=1, weight=None, size_average=True):
         super(IoULoss, self).__init__()
         self.smooth = smooth
 
     def forward(self, inputs, targets, smooth=None):
-        # comment out if your model contains a sigmoid or equivalent activation layer
         smooth = smooth if smooth else self.smooth
-
-        inputs = F.sigmoid(inputs)
 
         # flatten label and prediction tensors
         inputs = inputs.view(-1)
@@ -81,11 +73,9 @@ class FocalLoss(nn.Module):
         self.gamma = gamma
 
     def forward(self, inputs, targets, alpha=None, gamma=None):
-        # comment out if your model contains a sigmoid or equivalent activation layer
         alpha = alpha if alpha else self.alpha
         gamma = gamma if gamma else self.gamma
 
-        inputs = F.sigmoid(inputs)
 
         # flatten label and prediction tensors
         inputs = inputs.view(-1)
@@ -100,17 +90,16 @@ class FocalLoss(nn.Module):
 
 
 class TverskyLoss(nn.Module):
-    def __init__(self, alpha=0.5, beta=0.5, weight=None, size_average=True):
+    def __init__(self, alpha=0.5, beta=0.5, smooth=1, weight=None, size_average=True):
         super(TverskyLoss, self).__init__()
         self.alpha = alpha
         self.beta = beta
+        self.smooth = smooth
 
-    def forward(self, inputs, targets, smooth=1, alpha=None, beta=None):
-        # comment out if your model contains a sigmoid or equivalent activation layer
+    def forward(self, inputs, targets, smooth=None, alpha=None, beta=None):
         alpha = alpha if alpha else self.alpha
         beta = beta if beta else self.beta
-
-        inputs = F.sigmoid(inputs)
+        smooth = smooth if smooth else self.smooth
 
         # flatten label and prediction tensors
         inputs = inputs.view(-1)
@@ -127,19 +116,18 @@ class TverskyLoss(nn.Module):
 
 
 class FocalTverskyLoss(nn.Module):
-    def __init__(self, alpha=0.5, beta=0.5, gamma=1, weight=None, size_average=True):
+    def __init__(self, alpha=0.5, beta=0.5, gamma=1, smooth=1, weight=None, size_average=True):
         super(FocalTverskyLoss, self).__init__()
         self.alpha = alpha
         self.beta = beta
         self.gamma = gamma
+        self.smooth = smooth
 
-    def forward(self, inputs, targets, smooth=1, alpha=None, beta=None, gamma=None):
-        # comment out if your model contains a sigmoid or equivalent activation layer
+    def forward(self, inputs, targets, smooth=None, alpha=None, beta=None, gamma=None):
         alpha = alpha if alpha else self.alpha
         beta = beta if beta else self.beta
-        gamma = gamma if gamma else gamma
-
-        inputs = F.sigmoid(inputs)
+        gamma = gamma if gamma else self.gamma
+        smooth = smooth if smooth else self.smooth
 
         # flatten label and prediction tensors
         inputs = inputs.view(-1)
@@ -157,16 +145,18 @@ class FocalTverskyLoss(nn.Module):
 
 
 class ComboLoss(nn.Module):
-    def __init__(self, alpha=0.5, ce_ration=0.5, weight=None, size_average=True):
+    def __init__(self, alpha=0.5, ce_ration=0.5, smooth=1, weight=None, size_average=True):
         super(ComboLoss, self).__init__()
         self.alpha = alpha # < 0.5 penalises FP more, > 0.5 penalises FN more
         self.ce_ration = ce_ration # weighted contribution of modified CE loss compared to Dice loss
+        self.smooth = smooth
 
-    def forward(self, inputs, targets, smooth=1, alpha=None, ce_ratio=None, eps=1e-9):
-        # flatten label and prediction tensors
+    def forward(self, inputs, targets, smooth=None, alpha=None, ce_ratio=None, eps=1e-9):
         alpha = alpha if alpha else self.alpha
         ce_ratio = ce_ratio if ce_ratio else self.ce_ration
+        smooth = smooth if smooth else self.smooth
 
+        # flatten label and prediction tensors
         inputs = inputs.view(-1)
         targets = targets.view(-1)
 
